@@ -113,6 +113,7 @@ import {
   PartitionTreeDataProvider,
 } from "./espIdf/partition-table/tree";
 import { flashBinaryToPartition } from "./espIdf/partition-table/partitionFlasher";
+import { getEspMatter } from "./espMatter/espMatterDownload";
 
 // Global variables shared by commands
 let workspaceRoot: vscode.Uri;
@@ -606,6 +607,8 @@ export async function activate(context: vscode.ExtensionContext) {
   registerIDFCommand("espIdf.getEspAdf", getEspAdf);
 
   registerIDFCommand("espIdf.getEspMdf", getEspMdf);
+
+  registerIDFCommand("espIdf.getEspMatter", getEspMatter);
 
   registerIDFCommand("espIdf.selectPort", () => {
     PreCheck.perform(
