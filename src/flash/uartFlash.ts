@@ -28,7 +28,8 @@ export async function uartFlashCommand(
   flashBaudRate: string,
   idfPathDir: string,
   port: string,
-  workspace: vscode.Uri
+  workspace: vscode.Uri,
+  isUart: boolean = true
 ) {
   let continueFlag = true;
   const buildPath = join(workspace.fsPath, "build");
@@ -58,7 +59,7 @@ export async function uartFlashCommand(
     cancelToken.onCancellationRequested(() => {
       FlashTask.isFlashing = false;
     });
-    await flashTask.flash();
+    await flashTask.flash(isUart);
     await TaskManager.runTasks();
     if (!cancelToken.isCancellationRequested) {
       FlashTask.isFlashing = false;

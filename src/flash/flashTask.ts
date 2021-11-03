@@ -70,7 +70,7 @@ export class FlashTask {
     }
   }
 
-  public async flash() {
+  public async flash(isUart) {
     if (FlashTask.isFlashing) {
       throw new Error("ALREADY_FLASHING");
     }
@@ -98,8 +98,10 @@ export class FlashTask {
       powershellPath !== ""
     ) {
       flashExecution = await this._wslFlashExecution();
-    } else {
+    } else if (isUart) {
       flashExecution = this._flashExecution();
+    } else if(!isUart) {
+      flashExecution = this._dfuFlashing();
     }
     TaskManager.addTask(
       { type: "esp-idf", command: "ESP-IDF Flash" },
@@ -145,6 +147,18 @@ export class FlashTask {
     };
     const pythonBinPath = idfConf.readParameter("idf.pythonBinPath") as string;
     return new vscode.ProcessExecution(pythonBinPath, flasherArgs, options);
+  }
+
+  public _dfuFlashing() {
+    this.flashing(true);
+    const modifiedEnv = appendIdfAndToolsToPath();
+    const flasherArgs = this.getFlasherArgs(this.flashScriptPath);
+    const options: vscode.ShellExecutionOptions = {
+      cwd: this.buildDir,
+      env: modifiedEnv,
+    };
+    const dfuBinPath = idfConf.readParameter("dfu-util") as string;
+    return new vscode.ProcessExecution(dfuBinPath, flasherArgs, options);
   }
 
   public getFlasherArgs(toolPath: string, replacePathSep: boolean = false) {
