@@ -99,7 +99,7 @@ import { getNewProjectArgs } from "./newProject/newProjectInit";
 import { NewProjectPanel } from "./newProject/newProjectPanel";
 import { buildCommand } from "./build/buildCmd";
 import { verifyCanFlash } from "./flash/flashCmd";
-import { uartFlashCommand } from "./flash/uartFlash";
+import { flashCommand } from "./flash/uartFlash";
 import { jtagFlashCommand } from "./flash/jtagCmd";
 import { createMonitorTerminal } from "./espIdf/monitor/command";
 import { KconfigLangClient } from "./kconfig";
@@ -1188,7 +1188,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   registerIDFCommand("espIdf.createIdfTerminal", createIdfTerminal);
 
-  registerIDFCommand("espIdf.flashDFU", flash(false));
+  registerIDFCommand("espIdf.flashDFU", flash);
   registerIDFCommand("espIdf.flashDevice", flash);
   registerIDFCommand("espIdf.buildDevice", build);
   registerIDFCommand("espIdf.monitorDevice", createMonitor);
@@ -2777,7 +2777,7 @@ const build = () => {
     );
   });
 };
-const flash = (isUart: Boolean = true) => {
+const flash = () => {
   PreCheck.perform([webIdeCheck, openFolderCheck], async () => {
     await vscode.window.withProgress(
       {
@@ -2792,6 +2792,7 @@ const flash = (isUart: Boolean = true) => {
         const idfPathDir = idfConf.readParameter("idf.espIdfPath");
         const port = idfConf.readParameter("idf.port");
         const flashBaudRate = idfConf.readParameter("idf.flashBaudRate");
+        const selectedFlashType = idfConf.readParameter("idf.flashType");
         if (monitorTerminal) {
           monitorTerminal.sendText(ESP.CTRL_RBRACKET);
         }
@@ -2801,24 +2802,14 @@ const flash = (isUart: Boolean = true) => {
           workspaceRoot
         );
         if (canFlash) {
-          if(isUart) {
-            await uartFlashCommand(
-              cancelToken,
-              flashBaudRate,
-              idfPathDir,
-              port,
-              workspaceRoot
-            );
-          } else {
-            await uartFlashCommand(
-              cancelToken,
-              flashBaudRate,
-              idfPathDir,
-              port,
-              workspaceRoot,
-              false
-            );
-          }
+          await flashCommand(
+            cancelToken,
+            flashBaudRate,
+            idfPathDir,
+            port,
+            workspaceRoot,
+            selectedFlashType
+          );
         }
       }
     );
@@ -2875,17 +2866,24 @@ const buildFlashAndMonitor = async (runMonitor: boolean = true) => {
   });
 };
 
+enum selectedFlashType {
+  JTAG = "JTAG",
+  UART = "UART",
+  DFU = "DFU",
+}
+
 async function selectFlashMethod(cancelToken) {
-  let flashType = idfConf.readParameter("idf.flashType");
-  if (!flashType) {
-    flashType = await vscode.window.showQuickPick(["JTAG", "UART", "DFU"], {
+  // let flashType = idfConf.readParameter("idf.flashType");
+  let flashType = await vscode.window.showQuickPick(
+    Object.keys(selectedFlashType),
+    {
       ignoreFocusOut: true,
       placeHolder:
         "Select flash method, you can modify the choice later from settings 'idf.flashType'",
-    });
-    const target = idfConf.readParameter("idf.saveScope");
-    await idfConf.writeParameter("idf.flashType", flashType, target);
-  }
+    }
+  );
+  const target = idfConf.readParameter("idf.saveScope");
+  await idfConf.writeParameter("idf.flashType", flashType, target);
 
   if (!flashType) {
     return;
@@ -2905,22 +2903,14 @@ async function selectFlashMethod(cancelToken) {
   if (flashType === "JTAG") {
     const buildPath = path.join(workspaceRoot.fsPath, "build");
     return await jtagFlashCommand(buildPath);
-  } else if (flashType === "UART") {
-    return await uartFlashCommand(
-      cancelToken,
-      flashBaudRate,
-      idfPathDir,
-      port,
-      workspaceRoot
-    );
-  } else if (flashType === "DFU") {
-    return await uartFlashCommand(
+  } else {
+    return await flashCommand(
       cancelToken,
       flashBaudRate,
       idfPathDir,
       port,
       workspaceRoot,
-      false
+      flashType
     );
   }
 }

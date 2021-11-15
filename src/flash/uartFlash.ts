@@ -23,13 +23,13 @@ import { TaskManager } from "../taskManager";
 import { FlashTask } from "./flashTask";
 import { createFlashModel } from "./flashModelBuilder";
 
-export async function uartFlashCommand(
+export async function flashCommand(
   cancelToken: vscode.CancellationToken,
   flashBaudRate: string,
   idfPathDir: string,
   port: string,
   workspace: vscode.Uri,
-  isUart: boolean = true
+  flashType: string
 ) {
   let continueFlag = true;
   const buildPath = join(workspace.fsPath, "build");
@@ -59,7 +59,7 @@ export async function uartFlashCommand(
     cancelToken.onCancellationRequested(() => {
       FlashTask.isFlashing = false;
     });
-    await flashTask.flash(isUart);
+    await flashTask.flash(flashType);
     await TaskManager.runTasks();
     if (!cancelToken.isCancellationRequested) {
       FlashTask.isFlashing = false;
