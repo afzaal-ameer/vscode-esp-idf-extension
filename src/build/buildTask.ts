@@ -21,7 +21,11 @@ import { join, dirname } from "path";
 import { Logger } from "../logger/logger";
 import * as vscode from "vscode";
 import * as idfConf from "../idfConfiguration";
-import { appendIdfAndToolsToPath, isBinInPath } from "../utils";
+import {
+  appendIdfAndToolsToPath,
+  isBinInPath,
+  selectedAdapterId,
+} from "../utils";
 import { TaskManager } from "../taskManager";
 
 export class BuildTask {
@@ -62,22 +66,9 @@ export class BuildTask {
         this.curWorkspace
       }/dfu.bin --json ${
         this.curWorkspace
-      }/flasher_args.json --pid ${this.selectedAdapterId(
-        this.adapterTargetName
-      )}`,
+      }/flasher_args.json --pid ${selectedAdapterId(this.adapterTargetName)}`,
       options
     );
-  }
-
-  public selectedAdapterId(target) {
-    switch (target) {
-      case "esp32s2":
-        return 2;
-      case "esp32s3":
-        return 3;
-      default:
-        return;
-    }
   }
 
   public async build() {

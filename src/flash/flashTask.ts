@@ -29,6 +29,7 @@ import {
   execChildProcess,
   extensionContext,
   isBinInPath,
+  selectedAdapterId,
 } from "../utils";
 import { TaskManager } from "../taskManager";
 
@@ -151,7 +152,11 @@ export class FlashTask {
 
   public _dfuFlashing() {
     this.flashing(true);
-    return new vscode.ShellExecution(`dfu-util -D ${this.buildDir}/dfu.bin`);
+    return new vscode.ShellExecution(
+      `dfu-util -d 303a:${selectedAdapterId(this.model.chip)} -D ${
+        this.buildDir
+      }/dfu.bin`
+    );
   }
 
   public getFlasherArgs(toolPath: string, replacePathSep: boolean = false) {
