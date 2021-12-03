@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ConfigurationTarget, Progress, window, WorkspaceFolder } from "vscode";
+import {
+  ConfigurationTarget,
+  Progress,
+  window,
+  workspace,
+  WorkspaceFolder,
+} from "vscode";
 import { IdfToolsManager, IEspIdfTool } from "../idfToolsManager";
 import * as utils from "../utils";
 import { getEspIdfVersions } from "./espIdfVersionList";
@@ -35,6 +41,7 @@ export interface ISetupInitArgs {
   gitPath: string;
   gitVersion: string;
   hasPrerequisites: boolean;
+  onReqPkgs?: string[];
   pythonVersions: string[];
   toolsResults: IEspIdfTool[];
   pyBinPath: string;
@@ -107,14 +114,19 @@ export async function checkPreviousInstall(
   );
 
   const exportedToolsPaths = await idfToolsManager.exportPathsInString(
-    path.join(toolsPath, "tools")
+    path.join(toolsPath, "tools"),
+    ["cmake", "ninja"]
   );
   const toolsInfo = await idfToolsManager.getRequiredToolsInfo(
     path.join(toolsPath, "tools"),
-    exportedToolsPaths
+    exportedToolsPaths,
+    ["cmake", "ninja"]
   );
 
-  const failedToolsResult = toolsInfo.filter((tInfo) => !tInfo.doesToolExist);
+  const failedToolsResult = toolsInfo.filter(
+    (tInfo) =>
+      !tInfo.doesToolExist && ["cmake", "ninja"].indexOf(tInfo.name) === -1
+  );
   if (failedToolsResult.length > 0) {
     return {
       espIdfPath,
@@ -263,21 +275,36 @@ export async function getSetupInitialValues(
     // Get initial paths
     const prevInstall = await checkPreviousInstall(pythonVersions);
     if (process.platform !== "win32") {
-      const canAccessCMake = await utils.isBinInPath(
-        "cmake",
-        extensionPath,
-        process.env
-      );
-      const canAccessNinja = await utils.isBinInPath(
-        "ninja",
-        extensionPath,
-        process.env
-      );
       setupInitArgs.hasPrerequisites =
         prevInstall.gitVersion !== "Not found" &&
-        canAccessCMake !== "" &&
-        canAccessNinja !== "" &&
-        pythonVersions && pythonVersions.length > 0;
+        pythonVersions &&
+        pythonVersions.length > 0;
+
+      const cmakeFromToolsIndex = getToolIndex(
+        "cmake",
+        prevInstall.toolsResults
+      );
+
+      if (cmakeFromToolsIndex !== -1) {
+        prevInstall.toolsResults.splice(cmakeFromToolsIndex, 1);
+      } else {
+        setupInitArgs.onReqPkgs = setupInitArgs.onReqPkgs
+          ? [...setupInitArgs.onReqPkgs, "cmake"]
+          : ["cmake"];
+      }
+
+      const ninjaFromToolsIndex = getToolIndex(
+        "ninja",
+        prevInstall.toolsResults
+      );
+
+      if (ninjaFromToolsIndex !== -1) {
+        prevInstall.toolsResults.splice(ninjaFromToolsIndex, 1);
+      } else {
+        setupInitArgs.onReqPkgs = setupInitArgs.onReqPkgs
+          ? [...setupInitArgs.onReqPkgs, "ninja"]
+          : ["ninja"];
+      }
     } else {
       setupInitArgs.hasPrerequisites = prevInstall.gitVersion !== "Not found";
     }
@@ -297,6 +324,17 @@ export async function getSetupInitialValues(
     Logger.error(error.message, error);
   }
   return setupInitArgs;
+}
+
+function getToolIndex(toolName: string, toolsResults: IEspIdfTool[]) {
+  return toolsResults && toolsResults.length
+    ? toolsResults.findIndex(
+        (t) =>
+          t.name.indexOf(toolName) !== -1 &&
+          t.actual.indexOf("No match") === -1 &&
+          t.actual.indexOf("Error") === -1
+      )
+    : -1;
 }
 
 export async function isCurrentInstallValid() {
@@ -322,13 +360,33 @@ export async function isCurrentInstallValid() {
     espIdfPath,
     gitPath
   );
+  let extraReqPaths = [];
+  if (process.platform !== "win32") {
+    const canAccessCMake = await utils.isBinInPath(
+      "cmake",
+      containerPath,
+      process.env
+    );
+    if (!canAccessCMake) {
+      extraReqPaths.push("cmake");
+    }
+    const canAccessNinja = await utils.isBinInPath(
+      "ninja",
+      containerPath,
+      process.env
+    );
+    if (!canAccessNinja) {
+      extraReqPaths.push("ninja");
+    }
+  }
   const toolsInfo = await idfToolsManager.getRequiredToolsInfo(
     path.join(toolsPath, "tools"),
-    extraPaths
+    extraPaths,
+    extraReqPaths
   );
   const failedToolsResult = toolsInfo.filter(
     (tInfo) =>
-      tInfo.actual.indexOf("No match") !== -1 ||
+      tInfo.actual.indexOf("No match") !== -1 &&
       tInfo.actual.indexOf("Error") !== -1
   );
   return failedToolsResult.length === 0;
@@ -355,37 +413,37 @@ export async function saveSettings(
     "idf.espIdfPath",
     espIdfPath,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   await idfConf.writeParameter(
     "idf.pythonBinPath",
     pythonBinPath,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   await idfConf.writeParameter(
     "idf.toolsPath",
     toolsPath,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   await idfConf.writeParameter(
     "idf.customExtraPaths",
     exportedPaths,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   await idfConf.writeParameter(
     "idf.customExtraVars",
     exportedVars,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   await idfConf.writeParameter(
     "idf.gitPath",
     gitPath,
     confTarget,
-    workspaceFolder
+    workspaceFolder ? workspaceFolder.uri : undefined
   );
   window.showInformationMessage("ESP-IDF has been configured");
 }

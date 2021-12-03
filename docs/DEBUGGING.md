@@ -1,5 +1,7 @@
 # Configuration for Visual Studio Code Debug
 
+> **NOTE:** Make sure to configure your drivers as mentioned in ESP-IDF [Configure JTAG interface](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/jtag-debugging/configure-ft2232h-jtag.html) documentation.
+
 > **NOTE:** Please take a look first at [ESP-IDF JTAG Debugging](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/jtag-debugging/index.html#how-it-works).
 > OpenOCD typically uses port 4444 for Telnet communication, port 6666 for TCL communication and port 3333 for gdb.
 
@@ -111,6 +113,7 @@ The user can also use [Microsoft C/C++ Extension](https://marketplace.visualstud
       "environment": [{ "name": "PATH", "value": "${config:idf.customExtraPaths}" }],
       "setupCommands": [
         { "text": "target remote :3333" },
+        { "text": "set remote hardware-watchpoint-limit 2"},
         { "text": "mon reset halt" },
         { "text": "thb app_main" },
         { "text": "flushregs" }
