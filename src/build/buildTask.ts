@@ -138,7 +138,11 @@ export class BuildTask {
       }
       const compileExecution = this.getShellExecution(compilerArgs, options);
       TaskManager.addTask(
-        { type: "esp-idf", command: "ESP-IDF Compile", taskId: "idf-compile-task" },
+        {
+          type: "esp-idf",
+          command: "ESP-IDF Compile",
+          taskId: "idf-compile-task",
+        },
         vscode.TaskScope.Workspace,
         "ESP-IDF Compile",
         compileExecution,
@@ -147,9 +151,8 @@ export class BuildTask {
       );
     }
 
-    const buildArgs = (idfConf.readParameter("idf.ninjaArgs") as Array<
-      string
-    >) || [];
+    const buildArgs =
+      (idfConf.readParameter("idf.ninjaArgs") as Array<string>) || [];
     const buildExecution = this.getNinjaShellExecution(buildArgs, options);
     TaskManager.addTask(
       { type: "esp-idf", command: "ESP-IDF Build", taskId: "idf-build-task" },
@@ -178,9 +181,13 @@ export class BuildTask {
 
     const writeExecution = this.dfuShellExecution(options);
     TaskManager.addTask(
-      { type: "esp-idf", command: "ESP-IDF Write DFU.bin" },
+      {
+        type: "esp-idf",
+        command: "ESP-IDF Write DFU.bin",
+        taskId: "idf-write-dfu-task",
+      },
       vscode.TaskScope.Workspace,
-      "ESP-IDF Write DFU.bi",
+      "ESP-IDF Write DFU.bin",
       writeExecution,
       ["idfRelative", "idfAbsolute"],
       showTaskOutput
