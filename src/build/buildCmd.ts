@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { pathExists } from "fs-extra";
 import { BuildTask } from "./buildTask";
 import { FlashTask } from "../flash/flashTask";
 import { LocDictionary } from "../localizationDictionary";
@@ -58,6 +59,12 @@ export async function buildCommand(
     await sizeTask.getSizeInfo();
     await TaskManager.runTasks();
     if (buildType === "DFU") {
+      const buildPath = join(workspace.fsPath, "build");
+      if (!(await pathExists(join(buildPath, "flasher_args.json")))) {
+        return Logger.warnNotify(
+          "flasher_args.json file is missing from the build directory, can't proceed, please build properly!!"
+        );
+      }
       await buildTask.buildDfu();
       await TaskManager.runTasks();
     }

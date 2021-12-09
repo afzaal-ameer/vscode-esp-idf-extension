@@ -959,7 +959,7 @@ export async function createNewComponent(
   );
 }
 
-export function selectedAdapterId(chip) {
+export function selectedDFUAdapterId(chip) {
   switch (chip) {
     case "esp32s2":
       return 2;

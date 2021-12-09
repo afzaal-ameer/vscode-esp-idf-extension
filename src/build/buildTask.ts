@@ -24,7 +24,7 @@ import * as idfConf from "../idfConfiguration";
 import {
   appendIdfAndToolsToPath,
   isBinInPath,
-  selectedAdapterId,
+  selectedDFUAdapterId,
 } from "../utils";
 import { TaskManager } from "../taskManager";
 
@@ -66,7 +66,9 @@ export class BuildTask {
         this.curWorkspace
       }/dfu.bin --json ${
         this.curWorkspace
-      }/flasher_args.json --pid ${selectedAdapterId(this.adapterTargetName)}`,
+      }/flasher_args.json --pid ${selectedDFUAdapterId(
+        this.adapterTargetName
+      )}`,
       options
     );
   }
