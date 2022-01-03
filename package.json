@@ -2,7 +2,7 @@
   "name": "esp-idf-extension",
   "displayName": "Espressif IDF",
   "description": "Develop and debug applications for Espressif ESP32, ESP32-S2 chips with ESP-IDF",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "Apache-2.0",
   "publisher": "espressif",
   "icon": "media/espressif_icon.png",
@@ -71,6 +71,7 @@
     "onCommand:espIdf.removeCoverage",
     "onCommand:espIdf.searchInEspIdfDocs",
     "onCommand:espIdf.setup.start",
+    "onCommand:espIdf.welcome.start",
     "onCommand:espIdf.examples.start",
     "onCommand:esp.rainmaker.backend.connect",
     "onCommand:esp.rainmaker.backend.sync",
@@ -336,6 +337,11 @@
         "command": "espIdf.searchInEspIdfDocs",
         "key": "ctrl+e q",
         "mac": "cmd+i q"
+      },
+      {
+        "command": "espIdf.customTask",
+        "key": "ctrl+e j",
+        "mac": "cmd+i j"
       }
     ],
     "configuration": [
@@ -691,6 +697,12 @@
             "scope": "resource",
             "default": "https://components.espressif.com"
           },
+          "idf.wslEnable": {
+            "type": "boolean",
+            "description": "%param.wslEnable%",
+            "scope": "resource",
+            "default": true
+          },
           "idf.openOcdDebugLevel": {
             "type": "number",
             "default": 2,
@@ -710,6 +722,36 @@
             ],
             "scope": "resource",
             "description": "%param.openOcdDebugLevel%"
+          },
+          "idf.preBuildTask": {
+            "type": "string",
+            "default": "",
+            "scope": "resource",
+            "description": "%param.preBuildTask%"
+          },
+          "idf.postBuildTask": {
+            "type": "string",
+            "default": "",
+            "scope": "resource",
+            "description": "%param.postBuildTask%"
+          },
+          "idf.preFlashTask": {
+            "type": "string",
+            "default": "",
+            "scope": "resource",
+            "description": "%param.preFlashTask%"
+          },
+          "idf.postFlashTask": {
+            "type": "string",
+            "default": "",
+            "scope": "resource",
+            "description": "%param.postFlashTask%"
+          },
+          "idf.customTask": {
+            "type": "string",
+            "default": "",
+            "scope": "resource",
+            "description": "%param.customTask%"
           }
         }
       }
@@ -1002,6 +1044,16 @@
         "command": "espIdf.qemuDebug",
         "title": "%espIdf.qemuDebug.title%",
         "category": "ESP-IDF"
+      },
+      {
+        "command": "espIdf.customTask",
+        "title": "%espIdf.customTask.title%",
+        "category": "ESP-IDF"
+      },
+      {
+        "command": "espIdf.welcome.start",
+        "title": "%espIdf.welcome.title%",
+        "category": "ESP-IDF"
       }
     ],
     "breakpoints": [
@@ -1070,10 +1122,15 @@
                 "description": "%esp_idf.gdbinitFile.description%",
                 "default": ""
               },
-              "skipVerifyAppBinBeforeDebug": {
+              "verifyAppBinBeforeDebug": {
                 "type": "boolean",
-                "description": "%esp_idf.skipVerifyAppBinBeforeDebug.description%",
-                "default": true
+                "description": "%esp_idf.verifyAppBinBeforeDebug.description%",
+                "default": false
+              },
+              "tmoScaleFactor": {
+                "type": "number",
+                "description": "%esp_idf.tmoScaleFactor.description%",
+                "default": 1
               }
             }
           }
@@ -1152,7 +1209,7 @@
     "validateLocalization": "gulp validateLocalization",
     "webpack": "webpack --mode production",
     "packageWithoutDependencies": "gulp noDepBuild && vsce package --yarn -o esp-idf-extension-open.vsix",
-    "ui-test": "yarn compile && extest setup-and-run -y -i -u -l DEBUG -o testFiles/settings.json 'out/ui-test/*-test.js'",
+    "ui-test": "yarn compile && extest setup-and-run -y -i -u -l DEBUG -o testFiles/testWorkspace/.vscode/settings.json 'out/ui-test/*-test.js'",
     "ci-test": "yarn compile && extest setup-and-run './out/ui-test/*-test.js' -u -s test-resources -l DEBUG"
   },
   "devDependencies": {

@@ -49,6 +49,8 @@
   "espIdf.createDevContainer.title": "Добавить конфигурацию контейнера докеров",
   "espIdf.partition.table.refresh.title": "Обновить таблицу разделов",
   "espIdf.flashBinaryToPartition.title": "Прошить двоичный файл для раздела ...",
+  "espIdf.customTask.title": "Выполнить настраиваемую задачу",
+  "espIdf.welcome.title": "Добро пожаловать",
   "esp.component-manager.ui.show.title": "Показать реестр компонентов",
   "esp.component-manager.cli.addDependencyError": "Ошибка при добавлении зависимости к компоненту",
   "debug.initConfig.name": "ESP-IDF: Запустить",
@@ -81,7 +83,13 @@
   "param.enableIdfComponentManager.title": "Включить менеджер компонентов IDF в задаче сборки",
   "param.enableCCache.title": "Включить CCache в задаче сборки",
   "param.qemuTcpPort": "QEMU tcp порт для последовательной связи",
+  "param.wslEnable": "Включение использования PowerShell для WSL flash и задач мониторинга",
   "param.openOcdDebugLevel": "Уровень отладки OpenOCD Server",
+  "param.preBuildTask": "Предварительная сборка настраиваемой задачи",
+  "param.postBuildTask": "Опубликовать настраиваемую задачу сборки",
+  "param.preFlashTask": "Специальная задача предварительной прошивки",
+  "param.postFlashTask": "Опубликовать настраиваемую задачу Flash",
+  "param.customTask": "Специальная задача",
   "view.components.name": "Компоненты проекта",
   "configuration.title": "ESP-IDF",
   "espIdf.apptrace.archive.refresh.title": "Обновить список архива трассировки",
@@ -117,5 +125,6 @@
   "esp_idf.initGdbCommands.description": "Одна или несколько команд GDB для настройки отладчика. Пример: \"initGdbCommands\": [ \"target remote /dev/ttyUSB0\"]",
   "esp_idf.gdbinitFile.description": "Путь к файлу gdbinit для адаптера отладки ESP-IDF",
   "esp_idf.debuggers.text.description": "Команда для выполнения",
-  "esp_idf.skipVerifyAppBinBeforeDebug.description": "Пропустить проверку двоичных файлов приложения перед отладкой"
+  "esp_idf.verifyAppBinBeforeDebug.description": "Проверьте двоичные файлы приложения перед отладкой",
+  "esp_idf.tmoScaleFactor.description": "Коэффициент масштабирования для тайм-аута GDB [по умолчанию: 1]"
 }

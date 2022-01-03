@@ -27,6 +27,7 @@ import { join } from "path";
 import { updateIdfComponentsTree } from "../workspaceConfig";
 import { IdfSizeTask } from "../espIdf/size/idfSizeTask";
 import { readParameter } from "../idfConfiguration";
+import { CustomTask, CustomTaskType } from "../customTasks/customTaskProvider";
 
 const locDic = new LocDictionary(__filename);
 
@@ -38,6 +39,7 @@ export async function buildCommand(
   let continueFlag = true;
   const buildTask = new BuildTask(workspace.fsPath);
   const sizeTask = new IdfSizeTask(workspace.fsPath);
+  const customTask = new CustomTask(workspace.fsPath);
   if (BuildTask.isBuilding || FlashTask.isFlashing) {
     const waitProcessIsFinishedMsg = locDic.localize(
       "build.waitProcessIsFinishedMessage",
@@ -55,9 +57,11 @@ export async function buildCommand(
     buildTask.building(false);
   });
   try {
+    customTask.addCustomTask(CustomTaskType.PreBuild);
     await buildTask.build();
     await TaskManager.runTasks();
     await sizeTask.getSizeInfo();
+    customTask.addCustomTask(CustomTaskType.PostBuild);
     await TaskManager.runTasks();
     if (buildType === "DFU") {
       const buildPath = join(workspace.fsPath, "build");

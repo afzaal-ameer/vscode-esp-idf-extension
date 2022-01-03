@@ -113,6 +113,10 @@ import {
   PartitionTreeDataProvider,
 } from "./espIdf/partition-table/tree";
 import { flashBinaryToPartition } from "./espIdf/partition-table/partitionFlasher";
+import { CustomTask, CustomTaskType } from "./customTasks/customTaskProvider";
+import { TaskManager } from "./taskManager";
+import { WelcomePanel } from "./welcome/panel";
+import { getWelcomePageInitialValues } from "./welcome/welcomeInit";
 
 // Global variables shared by commands
 let workspaceRoot: vscode.Uri;
@@ -614,6 +618,18 @@ export async function activate(context: vscode.ExtensionContext) {
     );
   });
 
+  registerIDFCommand("espIdf.customTask", async () => {
+    try {
+      const customTask = new CustomTask(workspaceRoot.fsPath);
+      customTask.addCustomTask(CustomTaskType.Custom);
+      await TaskManager.runTasks();
+    } catch (error) {
+      const errMsg =
+        error && error.message ? error.message : "Error at custom task";
+      Logger.errorNotify(errMsg, error);
+    }
+  });
+
   registerIDFCommand("espIdf.pickAWorkspaceFolder", () => {
     PreCheck.perform([openFolderCheck], async () => {
       const selectCurrentFolderMsg = locDic.localize(
@@ -928,6 +944,7 @@ export async function activate(context: vscode.ExtensionContext) {
             appOffset: session.configuration.appOffset,
             elfFile: session.configuration.elfFilePath,
             debugAdapterPort: portToUse,
+            tmoScaleFactor: session.configuration.tmoScaleFactor,
           } as IDebugAdapterConfig;
           debugAdapterManager.configureAdapter(debugAdapterConfig);
           await debugAdapterManager.start();
@@ -946,6 +963,7 @@ export async function activate(context: vscode.ExtensionContext) {
             env: session.configuration.env,
             gdbinitFilePath: session.configuration.gdbinitFile,
             initGdbCommands: session.configuration.initGdbCommands || [],
+            tmoScaleFactor: session.configuration.tmoScaleFactor,
             isPostMortemDebugMode: false,
             isOocdDisabled: false,
             logLevel: session.configuration.logLevel,
@@ -966,7 +984,10 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         return new vscode.DebugAdapterServer(portToUse);
       } catch (error) {
-        const errMsg = error.message || "Error starting ESP-IDF Debug Adapter";
+        const errMsg =
+          error && error.message
+            ? error.message
+            : "Error starting ESP-IDF Debug Adapter";
         return Logger.errorNotify(errMsg, error);
       }
     },
@@ -1580,6 +1601,34 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  registerIDFCommand("espIdf.welcome.start", async () => {
+    if (WelcomePanel.isCreatedAndHidden()) {
+      WelcomePanel.createOrShow(context.extensionPath);
+      return;
+    }
+    vscode.window.withProgress(
+      {
+        cancellable: false,
+        location: vscode.ProgressLocation.Notification,
+        title: "ESP-IDF: Welcome Page",
+      },
+      async (
+        progress: vscode.Progress<{ increment: number; message: string }>,
+        cancelToken: vscode.CancellationToken
+      ) => {
+        try {
+          const welcomeArgs = await getWelcomePageInitialValues(progress);
+          if (!welcomeArgs) {
+            throw new Error("Error getting welcome page initial values");
+          }
+          WelcomePanel.createOrShow(context.extensionPath, welcomeArgs);
+        } catch (error) {
+          Logger.errorNotify(error.message, error);
+        }
+      }
+    );
+  });
+
   registerIDFCommand("espIdf.newProject.start", () => {
     if (NewProjectPanel.isCreatedAndHidden()) {
       NewProjectPanel.createOrShow(context.extensionPath);
@@ -1934,7 +1983,6 @@ export async function activate(context: vscode.ExtensionContext) {
         type: "espidf",
         request: "launch",
         sessionID: "qemu.debug.session",
-        skipVerifyAppBinBeforeDebug: true,
       });
       vscode.debug.onDidTerminateDebugSession(async (session) => {
         if (session.configuration.sessionID === "qemu.debug.session") {
@@ -2394,7 +2442,6 @@ export async function activate(context: vscode.ExtensionContext) {
                   type: "espidf",
                   request: "launch",
                   sessionID: "core-dump.debug.session.ws",
-                  skipVerifyAppBinBeforeDebug: true,
                 });
                 vscode.debug.onDidTerminateDebugSession((session) => {
                   if (
@@ -2422,9 +2469,11 @@ export async function activate(context: vscode.ExtensionContext) {
       .on("gdb-stub-detected", async (resp) => {
         const setupCmd = [`target remote ${resp.port}`];
         const debugAdapterConfig = {
-          initGdbCommands: setupCmd,
-          isPostMortemDebugMode: true,
           elfFile: resp.prog,
+          initGdbCommands: setupCmd,
+          isOocdDisabled: false,
+          isPostMortemDebugMode: true,
+          logLevel: 5,
         } as IDebugAdapterConfig;
         try {
           debugAdapterManager.configureAdapter(debugAdapterConfig);
@@ -2433,7 +2482,6 @@ export async function activate(context: vscode.ExtensionContext) {
             type: "espidf",
             request: "launch",
             sessionID: "gdbstub.debug.session.ws",
-            skipVerifyAppBinBeforeDebug: true,
           });
           vscode.debug.onDidTerminateDebugSession((session) => {
             if (
@@ -2809,6 +2857,12 @@ function creatCmdsStatusBarItems() {
     "espIdf.createIdfTerminal",
     91
   );
+  statusBarItems["espIdf.customTask"] = createStatusBarItem(
+    "$(diff-renamed)",
+    "ESP-IDF: Execute custom task",
+    "espIdf.customTask",
+    90
+  );
   return statusBarItems;
 }
 
@@ -3055,7 +3109,7 @@ class IdfDebugConfigurationProvider
           `${elfFilePath} doesn't exist. Build this project first.`
         );
       }
-      if (!config.skipVerifyAppBinBeforeDebug) {
+      if (config.verifyAppBinBeforeDebug) {
         const isSameAppBinary = await verifyAppBinary(workspaceRoot.fsPath);
         if (!isSameAppBinary) {
           throw new Error(

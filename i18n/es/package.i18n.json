@@ -51,6 +51,8 @@
   "esp.component-manager.cli.addDependencyError": "Error al agregar dependencias al componente",
   "espIdf.partition.table.refresh.title": "Actualizar tabla de particiones",
   "espIdf.flashBinaryToPartition.title": "Programar binarios a la partición...",
+  "espIdf.customTask.title": "Ejecutar tarea personalizada",
+  "espIdf.welcome.title": "Bienvenido/a",
   "debug.initConfig.name": "Lanzar ESP-IDF:",
   "debug.initConfig.description": "Nueva configuración para proyectos ESP-IDF",
   "param.adapterTargetName": "Target para el ESP-IDF Debug Adapter",
@@ -81,7 +83,13 @@
   "param.enableIdfComponentManager.title": "Habilitar IDF Component Manager en construccion de proyecto",
   "param.enableCCache.title": "Habilitar CCache en construccion de proyecto",
   "param.qemuTcpPort": "QEMU tcp port para comunicación serial",
+  "param.wslEnable": "Habilitar el uso de powershell para tareas de flash y monitoreo en WSL",
   "param.openOcdDebugLevel": "Nivel de depuracion para servidor OpenOCD",
+  "param.preBuildTask": "Pre build tarea personalizada",
+  "param.postBuildTask": "Post build tarea personalizada",
+  "param.preFlashTask": "Pre build tarea personalizada",
+  "param.postFlashTask": "Post build tarea personalizada",
+  "param.customTask": "Tarea personalizada",
   "view.components.name": "Componentes de proyecto",
   "configuration.title": "ESP-IDF",
   "espIdf.apptrace.archive.refresh.title": "Refresh Trace Archive List",
@@ -117,5 +125,6 @@
   "esp_idf.initGdbCommands.description": "Uno o varios comandos GDB a ejecutar para iniciar el depurador. Ejemplo: \"initGdbCommands\": [ \"target remote /dev/ttyUSB0\"]",
   "esp_idf.gdbinitFile.description": "ruta del archivo gdbinit para el ESP-IDF Debug Adapter",
   "esp_idf.debuggers.text.description": "Comando a ejecutar",
-  "esp_idf.skipVerifyAppBinBeforeDebug.description": "Saltar verificación de binarios antes de depurar la aplicación"
+  "esp_idf.verifyAppBinBeforeDebug.description": "Verificar binarios antes de depurar la aplicación",
+  "esp_idf.tmoScaleFactor.description": "Factor de escala para gdb timeout [defecto:1]"
 }

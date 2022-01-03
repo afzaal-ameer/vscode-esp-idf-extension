@@ -49,6 +49,8 @@
   "espIdf.createDevContainer.title": "Add docker container configuration",
   "espIdf.partition.table.refresh.title": "Refresh partition table",
   "espIdf.flashBinaryToPartition.title": "Flash binary to partition...",
+  "espIdf.customTask.title": "Execute custom task",
+  "espIdf.welcome.title": "Welcome",
   "esp.component-manager.ui.show.title": "Show Component Registry",
   "esp.component-manager.cli.addDependencyError": "Error encountered while adding dependency to the component",
   "debug.initConfig.name": "ESP-IDF: Launch",
@@ -70,6 +72,7 @@
   "param.showOnboardingOnInit": "Show ESP-IDF Configuration window on extension activation",
   "param.cmakeCompilerArgs": "Arguments for CMake compilation task",
   "param.ninjaArgs": "Arguments for Ninja build task",
+  "param.customTask": "Custom task",
   "param.coveredLightTheme": "Background color for covered lines in Light theme for ESP-IDF Coverage.",
   "param.coveredDarkTheme": "Background color for covered lines in Dark theme for ESP-IDF Coverage.",
   "param.partialLightTheme": "Background color for partially covered lines in Light theme for ESP-IDF Coverage.",
@@ -78,7 +81,12 @@
   "param.uncoveredDarkTheme": "Background color for uncovered lines in Dark theme for ESP-IDF Coverage.",
   "param.enableUpdateSrcsToCMakeListsFile": "Enable update source files in CMakeLists.txt",
   "param.qemuTcpPort": "QEMU tcp port for serial communication",
+  "param.wslEnable": "Enable use of powershell for WSL flash and monitor tasks",
   "param.openOcdDebugLevel": "OpenOCD Server debug level",
+  "param.preBuildTask": "Pre build custom task",
+  "param.postBuildTask": "Post build custom task",
+  "param.preFlashTask": "Pre flash custom task",
+  "param.postFlashTask": "Post flash custom task",
   "view.components.name": "Project Components",
   "configuration.title": "ESP-IDF",
   "espIdf.apptrace.archive.refresh.title": "Refresh Trace Archive List",
@@ -117,5 +125,6 @@
   "esp_idf.initGdbCommands.description": "One or more GDB commands to execute in order to setup the underlying debugger. Example: \"initGdbCommands\": [ \"target remote /dev/ttyUSB0\"]",
   "esp_idf.gdbinitFile.description": "gdbinit file path for ESP-IDF Debug Adapter",
   "esp_idf.debuggers.text.description": "The command to execute",
-  "esp_idf.skipVerifyAppBinBeforeDebug.description": "Skip verify app binaries before debug"
+  "esp_idf.verifyAppBinBeforeDebug.description": "Verify app binaries before debug",
+  "esp_idf.tmoScaleFactor.description": "Scale factor for gdb timeout [default:1]"
 }

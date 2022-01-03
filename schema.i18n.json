@@ -93,6 +93,7 @@
     "espIdf.flashDFU.title",
     "espIdf.monitorDevice.title",
     "espIdf.setup.title",
+    "espIdf.welcome.title",
     "espIdf.examples.title",
     "espIdf.buildFlashMonitor.title",
     "espIdf.pickAWorkspaceFolder.title",
@@ -127,6 +128,7 @@
     "espIdf.createDevContainer.title",
     "espIdf.partition.table.refresh.title",
     "espIdf.flashBinaryToPartition.title",
+    "espIdf.customTask.title",
     "debug.initConfig.name",
     "debug.initConfig.description",
     "param.adapterTargetName",
@@ -188,13 +190,20 @@
     "esp_idf.initGdbCommands.description",
     "esp_idf.debuggers.text.description",
     "esp_idf.gdbinitFile.description",
-    "esp_idf.skipVerifyAppBinBeforeDebug.description",
+    "esp_idf.verifyAppBinBeforeDebug.description",
+    "esp_idf.tmoScaleFactor.description",
     "param.launchMonitorOnDebugSession.title",
     "param.enableIdfComponentManager.title",
     "param.enableCCache.title",
     "param.gitPath.title",
     "param.enableUpdateSrcsToCMakeListsFile",
     "param.qemuTcpPort",
-    "param.openOcdDebugLevel"
+    "param.wslEnable",
+    "param.openOcdDebugLevel",
+    "param.customTask",
+    "param.preBuildTask",
+    "param.postBuildTask",
+    "param.preFlashTask",
+    "param.postFlashTask"
   ]
 }
