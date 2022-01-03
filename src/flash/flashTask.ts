@@ -29,7 +29,6 @@ import {
   isBinInPath,
   selectedDFUAdapterId,
   isRunningInWsl,
-  listAvailableDfuDevices,
 } from "../utils";
 import { TaskManager } from "../taskManager";
 
